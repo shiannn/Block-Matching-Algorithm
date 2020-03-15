@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 import sys
+import math
 
 def SAD(m,n,u,v,frame1,frame2,sampleSize,height,width):
     if(legal(m,n,height,width)==0
@@ -18,10 +19,13 @@ def SAD(m,n,u,v,frame1,frame2,sampleSize,height,width):
     ret = 0
     for i in range(sampleSize):
         for j in range(sampleSize):
+            """
             temp2 = int(frame2[m+i,n+j])
             temp1 = int(frame1[m+u+i,n+v+j])
             #ret += abs(frame2[m+i,n+j] - frame1[m+u+i,n+v+j])
             ret += abs(temp2 - temp1)
+            """
+            ret += abs(int(frame2[m+i,n+j][0])-int(frame1[m+u+i,n+v+j][0]))+abs(int(frame2[m+i,n+j][0])-int(frame1[m+u+i,n+v+j][0]))+abs(int(frame2[m+i,n+j][0])-int(frame1[m+u+i,n+v+j][0]))
 
     return ret
 
@@ -61,15 +65,18 @@ def BlockMatch(imageA, imageB, sampleSize):
 #print(ret)
 
 if __name__ == '__main__':
-    trucka = cv2.imread('trucka.bmp', cv2.IMREAD_GRAYSCALE)
-    truckb = cv2.imread('truckb.bmp', cv2.IMREAD_GRAYSCALE)
+    #trucka = cv2.imread('trucka.bmp', cv2.IMREAD_GRAYSCALE)
+    #truckb = cv2.imread('truckb.bmp', cv2.IMREAD_GRAYSCALE)
+
+    trucka = cv2.imread('trucka.bmp')
+    truckb = cv2.imread('truckb.bmp')
 
     print(trucka.shape)
     print(truckb.shape)
 
     #sampleSize = [8,11,15,21,31]
     #sampleSize = 15
-    sampleSize = int(input('sample size [8,11,15,21,31]: '))
+    sampleSize = int(input('sample size [9,11,15,21,31]: '))
     height = trucka.shape[0]
     width = trucka.shape[1]
     numH = height // sampleSize
@@ -114,9 +121,13 @@ if __name__ == '__main__':
                             minV = v
             print('u,v',minU, minV)
             if minU!=None and minV!=None:
-                length = 5
+                vecLen = math.ceil((minU**2 + minV**2)**(1/2))
+                length = sampleSize-1
                 st = ((m1+m2)//2,(n1+n2)//2)
-                ed = (st[0]+length*minU, st[1]+length*minV)
+                if(vecLen == 0):
+                    ed = (st[0], st[1])
+                else:
+                    ed = (st[0]+length*minU//vecLen, st[1]+length*minV//vecLen)
                 print('st',st)
                 print('ed',ed)
                 #cv2.line(trucka, st, ed, (0,255,0), 5)
